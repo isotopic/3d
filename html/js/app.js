@@ -115,42 +115,6 @@ var APP = {
 			camera.aspect = this.width / this.height;
 			camera.updateProjectionMatrix();
 
-			if ( vr === true ) {
-
-				if ( camera.parent === null ) {
-
-					// camera needs to be in the scene so camera2 matrix updates
-
-					scene.add( camera );
-
-				}
-
-				var camera2 = camera.clone();
-				camera.add( camera2 );
-
-				camera = camera2;
-
-				controls = new THREE.VRControls( camera );
-				effect = new THREE.VREffect( renderer );
-
-				document.addEventListener( 'keyup', function ( event ) {
-
-					switch ( event.keyCode ) {
-						case 90:
-							controls.zeroSensor();
-							break;
-					}
-
-				} );
-
-				this.dom.addEventListener( 'dblclick', function () {
-
-					effect.setFullScreen( true );
-
-				} );
-
-			}
-
 		};
 
 		this.setScene = function ( value ) {
@@ -185,6 +149,10 @@ var APP = {
 
 		var prevTime, request;
 
+
+		var counter = 0;
+
+
 		function animate( time ) {
 
 			request = requestAnimationFrame( animate );
@@ -199,20 +167,23 @@ var APP = {
 
 			}
 
-			if ( vr === true ) {
+			camera.position.y = camera.init_position.y + (Math.sin(counter)*1.4);
+			camera.position.x = camera.init_position.x + (Math.sin(counter)*0.8);
+			camera.position.z = camera.init_position.z + (Math.sin(counter)*0.8);
+			scene.children[1].position.y = scene.children[1].init_position.y + Math.sin(counter)*0.8;
+			scene.children[1].rotation.z = scene.children[1].init_rotation.z + Math.sin(counter)*0.02;
 
-				controls.update();
-				effect.render( scene, camera );
+			counter+=0.01;
 
-			} else {
 
-				renderer.render( scene, camera );
 
-			}
+
+			renderer.render( scene, camera );
 
 			prevTime = time;
 
 		}
+
 
 		this.play = function () {
 
@@ -226,6 +197,11 @@ var APP = {
 			document.addEventListener( 'touchmove', onDocumentTouchMove );
 
 			dispatch( events.start, arguments );
+
+	camera.init_position = camera.position;
+	camera.init_rotation = camera.rotation;
+	scene.children[1].init_position = scene.children[1].position;
+	scene.children[1].init_rotation = scene.children[1].rotation;
 
 			request = requestAnimationFrame( animate );
 			prevTime = performance.now();
